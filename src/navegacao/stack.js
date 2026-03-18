@@ -8,7 +8,7 @@ function RootStack() {
   return (
     <Stack.Navigator>
       <Stack.Screen name="Login" component={Login} />
-      <Stack.Screen name="GestaoTareafas" component={GestaoTarefas} />
+      <Stack.Screen name="GestaoTarefas" component={GestaoTarefas} />
     </Stack.Navigator>
   );
 }

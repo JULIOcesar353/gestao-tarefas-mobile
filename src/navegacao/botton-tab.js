@@ -9,8 +9,8 @@ function GestaoTarefas() {
   return (
     <Tab.Navigator>
       <Tab.Screen name="Home" component={Home} />
-      <Tab.Screen name="Perfil" component={Perfil} />
       <Tab.Screen name="Tarefas" component={Tarefas} />
+      <Tab.Screen name="Perfil" component={Perfil} />
     </Tab.Navigator>
   );
 }
