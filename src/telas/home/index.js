@@ -1,54 +1,57 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useState } from 'react';
 import styles from './styles';
+import { tarefas } from '../../teste/tarefas';
 
 export default function Home() {
-    const [aberto, setAberto] = useState(false);
+    const [abertoId, setAbertoId] = useState(null);
 
     return (
         <View style={styles.container}>
+            {tarefas.map((tarefa) => {
+                const limite = 105;
 
-            {/* CARD GRANDE */}
-            <View style={styles.card}>
-                <View style={styles.headerCard}>
-                    <View>
-                        <Text style={styles.titulo}>Adega</Text>
-                        <Text style={styles.sub}>Corredor 9</Text>
+                const aberto = abertoId === tarefa.id;
+
+                const textoExibido = aberto
+                    ? tarefa.descricao
+                    : tarefa.descricao.slice(0, limite) +
+                      (tarefa.descricao.length > limite ? "..." : "");
+
+                return (
+                    <View key={tarefa.id} style={styles.card}>
+                        <View style={styles.headerCard}>
+                            <View>
+                                <Text style={styles.titulo}>{tarefa.titulo}</Text>
+                                <Text style={styles.sub}>{tarefa.corredor}</Text>
+                            </View>
+
+                            <View style={styles.actions}>
+                                <TouchableOpacity style={styles.botaoAceitar}>
+                                    <Text style={styles.textoBotao}>Aceitar</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+
+                        <Text style={styles.descricao}>
+                            {textoExibido}
+                        </Text>
+
+                        {tarefa.descricao.length > limite && (
+                            <TouchableOpacity
+                                onPress={() =>
+                                    setAbertoId(aberto ? null : tarefa.id)
+                                }
+                                style={styles.botaoSeta}
+                            >
+                                <Text style={styles.seta}>
+                                    {aberto ? '⌃' : '⌄'}
+                                </Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
-
-                    <View style={styles.actions}>
-                        <TouchableOpacity style={styles.botaoAceitar}>
-                            <Text style={styles.textoBotao}>Aceitar</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-                 {aberto && (
-                <Text style={styles.descricao}>
-                    Retirar todos os resquícios de sujeira e após isso lavar o chão.
-                    cada parte do estacionamento e guardar os carrinhos no fundo de forma organizada. 
-                </Text>
-                 )}
-                <TouchableOpacity onPress={() => setAberto(!aberto)}>
-                    <Text style={styles.seta}>
-                        {aberto ? '⌃' : '⌄'}
-                    </Text>
-                </TouchableOpacity>
-            </View>
-
-            {/* CARD MENOR */}
-            <View style={styles.card}>
-                <View>
-                    <Text style={styles.titulo}>Reposição</Text>
-                    <Text style={styles.sub}>Corredor 1</Text>
-                </View>
-
-                <View style={styles.actions}>
-                    <TouchableOpacity style={styles.botaoAceitar}>
-                        <Text style={styles.textoBotao}>Aceitar</Text>
-                    </TouchableOpacity>
-                    <Text style={styles.seta}>⌄</Text>
-                </View>
-            </View>
+                );
+            })}
         </View>
     );
 }
