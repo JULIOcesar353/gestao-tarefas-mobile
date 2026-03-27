@@ -3,16 +3,27 @@ import { StyleSheet } from 'react-native';
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#dcdcdc',
+        backgroundColor: '#F5F6FA',
         padding: 20,
     },
 
     card: {
-        backgroundColor: '#cfc4c4',
-        borderRadius: 20,
-        padding: 15,
-        marginBottom: 15,
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
+    padding: 15,
+    marginBottom: 15,
+    borderLeftWidth: 6,
+
+    shadowColor: "#000",
+    shadowOffset: {
+        width: 0,
+        height: 2
     },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+
+    elevation: 5
+},
 
     headerCard: {
         flexDirection: 'row',
@@ -60,6 +71,17 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-end',
         padding: 6, // área clicável boa pro dedo
     },
+    footer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center"
+},
+ 
+    badge:{
+    paddingHorizontal:10,
+    paddingVertical:4,
+    borderRadius:10,
+}
 });
 
 export default styles;
