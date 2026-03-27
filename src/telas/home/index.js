@@ -1,5 +1,4 @@
-import { View, Text, TouchableOpacity } from 'react-native';
-import { useState } from 'react';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';import { useState } from 'react';
 import styles from './styles';
 import { tarefas } from '../../teste/tarefas';
 
@@ -7,7 +6,7 @@ export default function Home() {
     const [abertoId, setAbertoId] = useState(null);
 
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container}>
             {tarefas.map((tarefa) => {
                 const limite = 105;
 
@@ -16,10 +15,15 @@ export default function Home() {
                 const textoExibido = aberto
                     ? tarefa.descricao
                     : tarefa.descricao.slice(0, limite) +
-                      (tarefa.descricao.length > limite ? "..." : "");
+                    (tarefa.descricao.length > limite ? "..." : "");
+
+                const corPrioridade =
+                    tarefa.prioridade === "Alta" ? "#EF4444" :
+                        tarefa.prioridade === "Média" ? "#F59E0B" :
+                            "#22C55E";
 
                 return (
-                    <View key={tarefa.id} style={styles.card}>
+                    <View key={tarefa.id} style={[styles.card, { borderLeftColor: corPrioridade }]}>
                         <View style={styles.headerCard}>
                             <View>
                                 <Text style={styles.titulo}>{tarefa.titulo}</Text>
@@ -36,22 +40,46 @@ export default function Home() {
                         <Text style={styles.descricao}>
                             {textoExibido}
                         </Text>
+                        <Text style={styles.setor}>
+                            Setor: {tarefa.setor}
+                        </Text>
 
-                        {tarefa.descricao.length > limite && (
-                            <TouchableOpacity
-                                onPress={() =>
-                                    setAbertoId(aberto ? null : tarefa.id)
-                                }
-                                style={styles.botaoSeta}
-                            >
-                                <Text style={styles.seta}>
-                                    {aberto ? '⌃' : '⌄'}
+                        <View style={styles.footer}>
+
+                            <View style={styles.rightFooter}>
+
+                                <Text style={styles.tempo}>
+                                    ⏱ {tarefa.tempo}
                                 </Text>
-                            </TouchableOpacity>
-                        )}
+
+                                <View style={[styles.badge, { backgroundColor: corPrioridade }]}>
+                                    <Text style={styles.badgeText}>
+                                        {tarefa.prioridade}
+                                    </Text>
+                                </View>
+
+                            </View>
+
+                            {
+                                tarefa.descricao.length > limite && (
+                                    <TouchableOpacity
+                                        onPress={() =>
+                                            setAbertoId(aberto ? null : tarefa.id)
+                                        }
+                                        style={styles.botaoSeta}
+                                    >
+                                        <Text style={styles.seta}>
+                                            {aberto ? '⌃' : '⌄'}
+                                        </Text>
+                                    </TouchableOpacity>
+                                )
+                            }
+
+                        </View>
+                       
                     </View>
                 );
             })}
-        </View>
+        </ScrollView >
     );
 }
