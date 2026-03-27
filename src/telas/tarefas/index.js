@@ -82,6 +82,8 @@ export default function MinhasTarefas() {
           style={styles.filtroBtn}
           onPress={() => setOrdemRecente(!ordemRecente)}
         >
+
+          
           <Text style={styles.filtroText}>
             {ordemRecente ? "Mais recente" : "Mais antigo"}
           </Text>
@@ -99,7 +101,18 @@ export default function MinhasTarefas() {
           </TouchableOpacity>
 
           {openSelect && (
-            <View style={{ backgroundColor: "#FFF", borderRadius: 8, marginTop: 4 }}>
+            <View
+              style={{
+                position: "absolute",
+                top: 40,
+                right: 0,
+                backgroundColor: "#FFF",
+                borderRadius: 8,
+                elevation: 5,
+                paddingVertical: 4,
+                zIndex: 10
+              }}
+            >
               {["Alta", "Média", "Baixa"].map((p) => (
                 <TouchableOpacity
                   key={p}
