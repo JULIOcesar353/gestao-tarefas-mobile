@@ -1,9 +1,9 @@
-import { StyleSheet } from 'react-native'; 
+import { StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
-    container: { 
+    container: {
         flex: 1,
-        backgroundColor: '#f1f5f9', 
+        backgroundColor: '#f1f5f9',
         alignItems: 'center',
         justifyContent: 'center',
         padding: 20
@@ -13,9 +13,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#ffffff',
         width: '100%',
         borderRadius: 16,
-        padding: 25,
-
-        // sombra
+        padding: 25,        
         elevation: 5,
         shadowColor: '#000',
         shadowOpacity: 0.1,
@@ -31,12 +29,13 @@ const styles = StyleSheet.create({
     },
 
     label: {
-        fontSize: 14,
+        fontSize: 16,
         color: '#64748b',
-        marginTop: 10
+        marginTop: 10,
+        fontWeight:'bold',
     },
 
-    input:{
+    input: {
         width: '100%',
         backgroundColor: '#f8fafc',
         borderRadius: 10,
@@ -47,19 +46,32 @@ const styles = StyleSheet.create({
         marginTop: 5
     },
 
-    botao:{
+   
+    botao: {
         backgroundColor: '#2563eb',
         width: '100%',
-        alignItems:'center',          
+        alignItems: 'center',
         borderRadius: 12,
         marginTop: 25,
-        padding: 12, 
+        padding: 12,
     },
 
-    txtBotao:{
+    txtBotao: {
         fontSize: 16,
-        fontWeight:'bold',
+        fontWeight: 'bold',
         color: '#fff'
+    },
+    inputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        width: '100%',
+    },
+
+
+    botaoOlho: {
+        position: 'absolute',
+        right: 10,
+        top: 18
     },
 });
 

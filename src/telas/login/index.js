@@ -10,6 +10,8 @@ export default function Login() {
     const [login, setLogin] = useState('');
     const [senha, setSenha] = useState('');
 
+    const [mostrarSenha, setMostrarSenha] = useState(false);
+
     return (
         <View style={styles.container}>
             <View style={styles.containerLogin}>
@@ -23,17 +25,25 @@ export default function Login() {
                     placeholder='Digite seu login'
                     style={styles.input}
                 />
-
                 <Text style={styles.label}>Senha</Text>
-                <TextInput
-                    value={senha}
-                    onChangeText={setSenha}
-                    placeholder='Digite sua senha'
-                    secureTextEntry={true}
-                    style={styles.input}
-                />
+                <View style={styles.inputContainer}>
+                    <TextInput
+                        value={senha}
+                        onChangeText={setSenha}
+                        placeholder='Digite sua senha'
+                        secureTextEntry={!mostrarSenha}
+                        style={styles.input}
+                    />
 
-                <TouchableOpacity 
+                    <TouchableOpacity
+                        onPress={() => setMostrarSenha(!mostrarSenha)}
+                        style={styles.botaoOlho}
+                    >
+                        <Text>{mostrarSenha ? '🙈' : '👁️'}</Text>
+                    </TouchableOpacity>
+                </View>
+
+                <TouchableOpacity
                     onPress={() => navigation.navigate('GestaoTarefas')}
                     style={styles.botao}
                 >
