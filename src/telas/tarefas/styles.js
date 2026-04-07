@@ -15,8 +15,10 @@ export const styles = StyleSheet.create({
   // filtros
   filtrosContainer: {
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 12
+    marginBottom: 12,
+    gap: 8,
   },
   filtroBtn: {
     backgroundColor: "#E0E3EA",
@@ -49,7 +51,7 @@ export const styles = StyleSheet.create({
   },
   descricao: {
     marginTop: 8,
-    color: "#666"
+    color: "#2c2c2c"
   },
   infoRow: {
     flexDirection: "row",
@@ -70,11 +72,25 @@ export const styles = StyleSheet.create({
   badge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 8
+    borderRadius: 8,
   },
   badgeText: {
     color: "#FFF",
     fontSize: 12,
-    fontWeight: "bold"
-  }
+    fontWeight: "bold",
+  },
+
+clearBtn: {
+  backgroundColor: "#FF4D4D",
+  paddingHorizontal: 12,
+  paddingVertical: 8,
+  borderRadius: 8
+},
+
+clearText: {
+  color: "#FFF",
+  fontWeight: "bold",
+  fontSize: 12
+}
+
 });

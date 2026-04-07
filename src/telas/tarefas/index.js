@@ -83,12 +83,23 @@ export default function MinhasTarefas() {
           onPress={() => setOrdemRecente(!ordemRecente)}
         >
 
-          
+
           <Text style={styles.filtroText}>
             {ordemRecente ? "Mais recente" : "Mais antigo"}
           </Text>
         </TouchableOpacity>
 
+        <TouchableOpacity
+          style={styles.clearBtn}
+          onPress={() => {
+            setPrioridadeFiltro(null);
+            setOrdemRecente(true);
+          }}
+        >
+          <Text style={styles.clearText}>Limpar</Text>
+        </TouchableOpacity>
+
+        
         {/* select prioridade */}
         <View>
           <TouchableOpacity
@@ -104,8 +115,9 @@ export default function MinhasTarefas() {
             <View
               style={{
                 position: "absolute",
-                top: 40,
+                top: 45,
                 right: 0,
+                width: 140, // 👈 ESSENCIAL
                 backgroundColor: "#FFF",
                 borderRadius: 8,
                 elevation: 5,
@@ -113,6 +125,8 @@ export default function MinhasTarefas() {
                 zIndex: 10
               }}
             >
+
+
               {["Alta", "Média", "Baixa"].map((p) => (
                 <TouchableOpacity
                   key={p}
@@ -122,20 +136,12 @@ export default function MinhasTarefas() {
                     setOpenSelect(false);
                   }}
                 >
-                  <Text>{p}</Text>
+                  <Text numberOfLines={1}>{p}</Text>
                 </TouchableOpacity>
               ))}
-
-              <TouchableOpacity
-                style={styles.selectOption}
-                onPress={() => {
-                  setPrioridadeFiltro(null);
-                  setOpenSelect(false);
-                }}
-              >
-                <Text>Limpar</Text>
-              </TouchableOpacity>
             </View>
+
+
           )}
         </View>
       </View>
