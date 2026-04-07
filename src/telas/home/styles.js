@@ -2,7 +2,6 @@ import { StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
         backgroundColor: '#F5F6FA',
         padding: 20,
     },
@@ -43,7 +42,8 @@ const styles = StyleSheet.create({
 
     descricao: {
         marginTop: 10,
-        fontSize: 14,
+        fontSize: 13,
+        color: '#2c2c2c'
     },
 
     actions: {
@@ -69,8 +69,9 @@ const styles = StyleSheet.create({
 
     botaoSeta: {
         alignSelf: 'flex-end',
-        padding: 6, // área clicável boa pro dedo
+        padding: 6,
     },
+
     footer: {
     flexDirection: "row",
     justifyContent: "space-between",
