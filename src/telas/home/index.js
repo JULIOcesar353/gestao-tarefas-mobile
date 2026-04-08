@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity, FlatList } from 'react-native';
 import { useState } from 'react';
+import { Picker } from '@react-native-picker/picker';
 import styles from './styles';
 import { tarefas } from '../../teste/tarefas';
 
@@ -26,27 +27,29 @@ export default function Home() {
 
         <View>
 
-            <View style={{ flexDirection: "row", gap: 10, marginBottom: 10 }}>
+            <View style={styles.filtrosContainer}>
 
-                <TouchableOpacity onPress={() => setFiltroTempo("recentes")}>
-                    <Text>Mais recentes</Text>
-                </TouchableOpacity>
+                <View style={styles.selectBox}>
+                    <Picker
+                        selectedValue={filtroTempo}
+                        onValueChange={(itemValue) => setFiltroTempo(itemValue)}
+                    >
+                        <Picker.Item label="Mais recentes" value="recentes" />
+                        <Picker.Item label="Mais antigas" value="antigas" />
+                    </Picker>
+                </View>
 
-                <TouchableOpacity onPress={() => setFiltroTempo("antigas")}>
-                    <Text>Mais antigas</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={() => setFiltroPrioridade("Alta")}>
-                    <Text>Alta</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={() => setFiltroPrioridade("Média")}>
-                    <Text>Média</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={() => setFiltroPrioridade("Baixa")}>
-                    <Text>Baixa</Text>
-                </TouchableOpacity>
+                <View style={styles.selectBox}>
+                    <Picker
+                        selectedValue={filtroPrioridade}
+                        onValueChange={(itemValue) => setFiltroPrioridade(itemValue)}
+                    >
+                        <Picker.Item label="Todas prioridades" value="todas" />
+                        <Picker.Item label="Alta" value="Alta" />
+                        <Picker.Item label="Média" value="Média" />
+                        <Picker.Item label="Baixa" value="Baixa" />
+                    </Picker>
+                </View>
 
             </View>
 
@@ -133,5 +136,5 @@ export default function Home() {
                 }}
             />
         </View>
-            );
+    );
 }
