@@ -74,7 +74,6 @@ export default function MinhasTarefas() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Minhas Tarefas</Text>
 
       <View style={styles.filtrosContainer}>
         {/* botão ordem */}
