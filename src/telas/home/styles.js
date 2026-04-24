@@ -4,6 +4,7 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: '#F5F6FA',
         padding: 16,
+        flex: 1,
     },
 
     card: {
@@ -98,12 +99,61 @@ const styles = StyleSheet.create({
         marginBottom: 12,
         gap: 8,
     },
+    filtroBtn: {
+        backgroundColor: "#E0E3EA",
+        padding: 8,
+        borderRadius: 8
+    },
+    filtroText: {
+        fontSize: 12,
+        fontWeight: "bold"
+    },
 
-    selectBox: {
-        backgroundColor: "#FFF",
+    select: {
+        backgroundColor: "#E0E3EA",
+        padding: 8,
         borderRadius: 8,
-        width: 170,
-        elevation: 3
+        justifyContent: "center",
+        marginRight: 8
+    },
+    selectOption: {
+        paddingHorizontal: 12,
+        paddingVertical: 10
+    },
+    emptyText: {
+        textAlign: "center",
+        color: "#777",
+        marginTop: 32,
+        fontSize: 14
+    },
+
+    clearBtn: {
+        backgroundColor: "#FF4D4D",
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 8
+    },
+
+    clearText: {
+        color: "#FFF",
+        fontWeight: "bold",
+        fontSize: 12
+    },
+
+    searchContainer: {
+        marginBottom: 12,
+    },
+
+    searchInput: {
+        backgroundColor: '#FFF',
+        borderRadius: 8,
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+        fontSize: 14,
+        borderWidth: 1,
+        borderColor: '#E0E3EA',
+        elevation: 2,
+        width: '100%',
     },
 });
 

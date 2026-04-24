@@ -73,6 +73,14 @@ const styles = StyleSheet.create({
         right: 10,
         top: 18
     },
+
+    errorText: {
+        color: '#dc2626',
+        fontSize: 14,
+        fontWeight: 'bold',
+        marginTop: 12,
+        textAlign: 'center'
+    },
 });
 
 export default styles;

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, FlatList, TouchableOpacity } from "react-native";
+import { View, Text, FlatList, TextInput, TouchableOpacity } from "react-native";
 import { tarefas } from "../../teste/tarefas";
 import { styles } from "./styles";
 
@@ -60,11 +60,20 @@ export default function MinhasTarefas() {
   const [ordemRecente, setOrdemRecente] = useState(true);
   const [prioridadeFiltro, setPrioridadeFiltro] = useState(null);
   const [openSelect, setOpenSelect] = useState(false);
+  const [searchText, setSearchText] = useState("");
+
+  const textoFiltrado = searchText.trim().toLowerCase();
 
   const tarefasFiltradas = tarefas
     .filter((t) => {
-      if (!prioridadeFiltro) return true;
-      return t.prioridade === prioridadeFiltro;
+      const matchesPriority = !prioridadeFiltro || t.prioridade === prioridadeFiltro;
+      const matchesSearch =
+        !textoFiltrado ||
+        [t.titulo, t.descricao, t.setor, t.corredor]
+          .filter(Boolean)
+          .some((campo) => campo.toLowerCase().includes(textoFiltrado));
+
+      return matchesPriority && matchesSearch;
     })
     .sort((a, b) => {
       const dataA = parseDate(a.criadoEm);
@@ -74,6 +83,16 @@ export default function MinhasTarefas() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Buscar por título, setor ou corredor"
+          placeholderTextColor="#999"
+          value={searchText}
+          onChangeText={setSearchText}
+          returnKeyType="search"
+        />
+      </View>
 
       <View style={styles.filtrosContainer}>
         {/* botão ordem */}
@@ -93,6 +112,7 @@ export default function MinhasTarefas() {
           onPress={() => {
             setPrioridadeFiltro(null);
             setOrdemRecente(true);
+            setSearchText("");
           }}
         >
           <Text style={styles.clearText}>Limpar</Text>
@@ -147,9 +167,14 @@ export default function MinhasTarefas() {
 
       <FlatList
         data={tarefasFiltradas}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => <TaskCard item={item} />}
         showsVerticalScrollIndicator={false}
+        ListEmptyComponent={
+          <Text style={styles.emptyText}>
+            Nenhuma tarefa encontrada.
+          </Text>
+        }
       />
     </View>
   );

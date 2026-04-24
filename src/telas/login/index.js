@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity, TextInput } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import styles from './styles';
 
 export default function Login() {
@@ -9,8 +9,48 @@ export default function Login() {
 
     const [login, setLogin] = useState('');
     const [senha, setSenha] = useState('');
-
+    const [error, setError] = useState('');
     const [mostrarSenha, setMostrarSenha] = useState(false);
+    const errorTimeoutRef = useRef(null);
+
+    useEffect(() => {
+        return () => {
+            if (errorTimeoutRef.current) {
+                clearTimeout(errorTimeoutRef.current);
+            }
+        };
+    }, []);
+
+    const showError = (message) => {
+        setError(message);
+        if (errorTimeoutRef.current) {
+            clearTimeout(errorTimeoutRef.current);
+        }
+
+        errorTimeoutRef.current = setTimeout(() => {
+            setError('');
+            errorTimeoutRef.current = null;
+        }, 3000);
+    };
+
+    const handleLogin = () => {
+        if (!login.trim() || !senha.trim()) {
+            showError('Preencha usuário e senha.');
+            return;
+        }
+
+        if (login === 'admin' && senha === 'admin') {
+            if (errorTimeoutRef.current) {
+                clearTimeout(errorTimeoutRef.current);
+                errorTimeoutRef.current = null;
+            }
+            setError('');
+            navigation.navigate('GestaoTarefas');
+            return;
+        }
+
+        showError('Usuário ou senha incorretos.');
+    };
 
     return (
         <View style={styles.container}>
@@ -43,8 +83,10 @@ export default function Login() {
                     </TouchableOpacity>
                 </View>
 
+                {!!error && <Text style={styles.errorText}>{error}</Text>}
+
                 <TouchableOpacity
-                    onPress={() => navigation.navigate('GestaoTarefas')}
+                    onPress={handleLogin}
                     style={styles.botao}
                 >
                     <Text style={styles.txtBotao}>Acessar sistema</Text>

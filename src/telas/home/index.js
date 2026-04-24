@@ -1,63 +1,126 @@
-import { View, Text, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, TextInput } from 'react-native';
 import { useState } from 'react';
-import { Picker } from '@react-native-picker/picker';
 import styles from './styles';
 import { tarefas } from '../../teste/tarefas';
 
+const parseDate = (dateStr) => {
+    const [d, m, y] = dateStr.split('/');
+    return new Date(`${y}-${m}-${d}`);
+};
+
 export default function Home() {
     const [abertoId, setAbertoId] = useState(null);
-    const [filtroTempo, setFiltroTempo] = useState("recentes");
-    const [filtroPrioridade, setFiltroPrioridade] = useState("todas");
+    const [ordemRecente, setOrdemRecente] = useState(true);
+    const [prioridadeFiltro, setPrioridadeFiltro] = useState(null);
+    const [openSelect, setOpenSelect] = useState(false);
+    const [searchText, setSearchText] = useState("");
 
-    let listaFiltrada = [...tarefas];
+    const textoFiltrado = searchText.trim().toLowerCase();
 
-    // filtro de prioridade
-    if (filtroPrioridade !== "todas") {
-        listaFiltrada = listaFiltrada.filter(
-            tarefa => tarefa.prioridade === filtroPrioridade
-        );
-    }
+    const listaFiltrada = tarefas
+        .filter((tarefa) => {
+            const matchesPrioridade = !prioridadeFiltro || tarefa.prioridade === prioridadeFiltro;
+            const matchesBusca =
+                !textoFiltrado ||
+                [tarefa.titulo, tarefa.descricao, tarefa.setor, tarefa.corredor]
+                    .filter(Boolean)
+                    .some((campo) => campo.toLowerCase().includes(textoFiltrado));
 
-    // ordenação por tempo
-    if (filtroTempo === "recentes") {
-        listaFiltrada.reverse();
-    }
+            return matchesPrioridade && matchesBusca;
+        })
+        .sort((a, b) => {
+            const dataA = parseDate(a.criadoEm);
+            const dataB = parseDate(b.criadoEm);
+            return ordemRecente ? dataB - dataA : dataA - dataB;
+        });
 
     return (
 
-        <View>
+        <View style={styles.container}>
+            <View style={styles.searchContainer}>
+                <TextInput
+                    style={styles.searchInput}
+                    placeholder="Buscar por título, setor ou corredor"
+                    placeholderTextColor="#999"
+                    value={searchText}
+                    onChangeText={setSearchText}
+                    returnKeyType="search"
+                />
+            </View>
 
             <View style={styles.filtrosContainer}>
+                {/* botão ordem */}
+                <TouchableOpacity
+                    style={styles.filtroBtn}
+                    onPress={() => setOrdemRecente(!ordemRecente)}
+                >
+                    <Text style={styles.filtroText}>
+                        {ordemRecente ? "Mais recente" : "Mais antigo"}
+                    </Text>
+                </TouchableOpacity>
 
-                <View style={styles.selectBox}>
-                    <Picker
-                        selectedValue={filtroTempo}
-                        onValueChange={(itemValue) => setFiltroTempo(itemValue)}
+                <TouchableOpacity
+                    style={styles.clearBtn}
+                    onPress={() => {
+                        setPrioridadeFiltro(null);
+                        setOrdemRecente(true);
+                        setSearchText("");
+                    }}
+                >
+                    <Text style={styles.clearText}>Limpar</Text>
+                </TouchableOpacity>
+
+                {/* select prioridade */}
+                <View>
+                    <TouchableOpacity
+                        style={styles.select}
+                        onPress={() => setOpenSelect(!openSelect)}
                     >
-                        <Picker.Item label="Mais recentes" value="recentes" />
-                        <Picker.Item label="Mais antigas" value="antigas" />
-                    </Picker>
-                </View>
+                        <Text style={styles.filtroText}>
+                            {prioridadeFiltro || "Prioridade"}
+                        </Text>
+                    </TouchableOpacity>
 
-                <View style={styles.selectBox}>
-                    <Picker
-                        selectedValue={filtroPrioridade}
-                        onValueChange={(itemValue) => setFiltroPrioridade(itemValue)}
-                    >
-                        <Picker.Item label="Todas prioridades" value="todas" />
-                        <Picker.Item label="Alta" value="Alta" />
-                        <Picker.Item label="Média" value="Média" />
-                        <Picker.Item label="Baixa" value="Baixa" />
-                    </Picker>
+                    {openSelect && (
+                        <View
+                            style={{
+                                position: "absolute",
+                                top: 45,
+                                right: 0,
+                                width: 140,
+                                backgroundColor: "#FFF",
+                                borderRadius: 8,
+                                elevation: 5,
+                                paddingVertical: 4,
+                                zIndex: 10
+                            }}
+                        >
+                            {["Alta", "Média", "Baixa"].map((p) => (
+                                <TouchableOpacity
+                                    key={p}
+                                    style={styles.selectOption}
+                                    onPress={() => {
+                                        setPrioridadeFiltro(p);
+                                        setOpenSelect(false);
+                                    }}
+                                >
+                                    <Text numberOfLines={1}>{p}</Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    )}
                 </View>
-
             </View>
 
             <FlatList
                 data={listaFiltrada}
-                keyExtractor={(item) => item.id.toString()}
+                keyExtractor={(item) => String(item.id)}
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={styles.container}
+                ListEmptyComponent={
+                    <Text style={styles.emptyText}>
+                        Nenhuma tarefa encontrada.
+                    </Text>
+                }
                 renderItem={({ item: tarefa }) => {
 
                     const limite = 105;

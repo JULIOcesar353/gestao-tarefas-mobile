@@ -30,6 +30,36 @@ export const styles = StyleSheet.create({
     fontWeight: "bold"
   },
 
+  searchContainer: {
+    marginBottom: 12
+  },
+  searchInput: {
+    backgroundColor: "#FFF",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 14,
+    borderWidth: 1,
+    borderColor: "#E0E3EA",
+    elevation: 2
+  },
+  select: {
+    backgroundColor: "#E0E3EA",
+    padding: 8,
+    borderRadius: 8,
+    justifyContent: "center"
+  },
+  selectOption: {
+    paddingHorizontal: 12,
+    paddingVertical: 10
+  },
+  emptyText: {
+    textAlign: "center",
+    color: "#777",
+    marginTop: 32,
+    fontSize: 14
+  },
+
   card: {
     backgroundColor: "#FFF",
     borderRadius: 12,
