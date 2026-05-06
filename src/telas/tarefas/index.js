@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { View, Text, FlatList, TextInput, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
 import { tarefas } from "../../teste/tarefas";
 import { styles } from "./styles";
 
@@ -26,7 +32,7 @@ const TaskCard = ({ item }) => (
   <TouchableOpacity
     style={[
       styles.card,
-      { borderLeftColor: getPriorityColor(item.prioridade) }
+      { borderLeftColor: getPriorityColor(item.prioridade) },
     ]}
     activeOpacity={0.8}
   >
@@ -36,7 +42,7 @@ const TaskCard = ({ item }) => (
       <View
         style={[
           styles.badge,
-          { backgroundColor: getPriorityColor(item.prioridade) }
+          { backgroundColor: getPriorityColor(item.prioridade) },
         ]}
       >
         <Text style={styles.badgeText}>{item.prioridade}</Text>
@@ -66,7 +72,8 @@ export default function MinhasTarefas() {
 
   const tarefasFiltradas = tarefas
     .filter((t) => {
-      const matchesPriority = !prioridadeFiltro || t.prioridade === prioridadeFiltro;
+      const matchesPriority =
+        !prioridadeFiltro || t.prioridade === prioridadeFiltro;
       const matchesSearch =
         !textoFiltrado ||
         [t.titulo, t.descricao, t.setor, t.corredor]
@@ -100,8 +107,6 @@ export default function MinhasTarefas() {
           style={styles.filtroBtn}
           onPress={() => setOrdemRecente(!ordemRecente)}
         >
-
-
           <Text style={styles.filtroText}>
             {ordemRecente ? "Mais recente" : "Mais antigo"}
           </Text>
@@ -118,7 +123,6 @@ export default function MinhasTarefas() {
           <Text style={styles.clearText}>Limpar</Text>
         </TouchableOpacity>
 
-        
         {/* select prioridade */}
         <View>
           <TouchableOpacity
@@ -141,11 +145,9 @@ export default function MinhasTarefas() {
                 borderRadius: 8,
                 elevation: 5,
                 paddingVertical: 4,
-                zIndex: 10
+                zIndex: 10,
               }}
             >
-
-
               {["Alta", "Média", "Baixa"].map((p) => (
                 <TouchableOpacity
                   key={p}
@@ -159,8 +161,6 @@ export default function MinhasTarefas() {
                 </TouchableOpacity>
               ))}
             </View>
-
-
           )}
         </View>
       </View>
@@ -171,9 +171,7 @@ export default function MinhasTarefas() {
         renderItem={({ item }) => <TaskCard item={item} />}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>
-            Nenhuma tarefa encontrada.
-          </Text>
+          <Text style={styles.emptyText}>Nenhuma tarefa encontrada.</Text>
         }
       />
     </View>
