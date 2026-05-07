@@ -4,14 +4,30 @@ import {
   TouchableOpacity,
   FlatList,
   TextInput,
+  ActivityIndicator,
 } from "react-native";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import styles from "./styles";
-import { getTarefas } from "../../services/tarefasService";
+import {
+  getTarefas,
+  aceitarTarefa,
+  mapearTarefas,
+  getCorPrioridade,
+} from "../../services/tarefasService";
+import { Toast, useToast, formatErrorMessage } from "../../utils/toast";
 
 export default function Home() {
+  const {
+    visible: toastVisible,
+    message: toastMessage,
+    type: toastType,
+    showToast,
+  } = useToast();
+
   const [tarefas, setTarefas] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [tarefasEmCarregamento, setTarefasEmCarregamento] = useState(new Set());
 
   const [abertoId, setAbertoId] = useState(null);
   const [ordemRecente, setOrdemRecente] = useState(true);
@@ -21,46 +37,80 @@ export default function Home() {
 
   const textoFiltrado = searchText.trim().toLowerCase();
 
-  useEffect(() => {
-    async function carregarTarefas() {
-      try {
-        const data = await getTarefas();
-        console.log("API retornou:", data);
+  // Função reutilizável para carregar tarefas
+  const fetchTarefas = async () => {
+    try {
+      setLoading(true);
+      const data = await getTarefas();
+      console.log("API retornou:", data);
 
-        // 🔥 ARRAY CORRETO
-        const lista = Array.isArray(data.dados) ? data.dados : [];
+      const lista = Array.isArray(data.dados) ? data.dados : [];
+      const tarefasFormatadas = mapearTarefas(lista);
 
-        const tarefasFormatadas = lista.map((t) => ({
-          id: t.tar_id,
-          titulo: t.tar_titulo || "",
-          descricao: t.tar_descricao || "",
-          prioridade:
-            t.tar_prioridade === 3
-              ? "Alta"
-              : t.tar_prioridade === 2
-                ? "Média"
-                : "Baixa",
-          criadoEm: new Date(t.tar_data_criacao),
-          setor: String(t.tar_setor_id),
-          corredor: "-",
-          tempo: `${t.tar_estimativa_minutos || 0} min`,
-        }));
-
-        setTarefas(tarefasFormatadas);
-      } catch (error) {
-        console.log("Erro ao buscar tarefas:", error);
-      } finally {
-        setLoading(false);
-      }
+      setTarefas(tarefasFormatadas);
+    } catch (error) {
+      console.error("Erro ao buscar tarefas:", error);
+      const mensagem = formatErrorMessage(error);
+      showToast(mensagem, "error");
+    } finally {
+      setLoading(false);
     }
+  };
 
-    carregarTarefas();
+  // Carregar tarefas ao montar o componente
+  useEffect(() => {
+    fetchTarefas();
   }, []);
+
+  // Recarregar tarefas ao voltar para a tela
+  useFocusEffect(
+    useCallback(() => {
+      fetchTarefas();
+    }, []),
+  );
+
+  // Handlers
+  const handleAceitarTarefa = async (tarefaId) => {
+    try {
+      // Adicionar à lista de carregamento
+      setTarefasEmCarregamento((prev) => new Set([...prev, tarefaId]));
+
+      const resultado = await aceitarTarefa(tarefaId);
+
+      if (resultado.sucesso || resultado.sucesso === undefined) {
+        showToast("Tarefa aceita com sucesso!", "success");
+
+        // Atualizar a lista localmente ou recarregar
+        setTimeout(() => {
+          fetchTarefas();
+        }, 500);
+      } else {
+        showToast(resultado.mensagem || "Erro ao aceitar tarefa", "error");
+      }
+    } catch (error) {
+      console.error("Erro ao aceitar tarefa:", error);
+      const mensagem = formatErrorMessage(error);
+      showToast(mensagem, "error");
+    } finally {
+      setTarefasEmCarregamento((prev) => {
+        const nova = new Set(prev);
+        nova.delete(tarefaId);
+        return nova;
+      });
+    }
+  };
 
   if (loading) {
     return (
       <View style={styles.container}>
-        <Text>Carregando tarefas...</Text>
+        <ActivityIndicator
+          size="large"
+          color="#4F46E5"
+          style={{ marginTop: 20 }}
+        />
+        <Text style={{ marginTop: 10, color: "#666" }}>
+          Carregando tarefas...
+        </Text>
       </View>
     );
   }
@@ -84,6 +134,8 @@ export default function Home() {
 
   return (
     <View style={styles.container}>
+      <Toast visible={toastVisible} message={toastMessage} type={toastType} />
+
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
@@ -166,18 +218,14 @@ export default function Home() {
         renderItem={({ item: tarefa }) => {
           const limite = 105;
           const aberto = abertoId === tarefa.id;
+          const emCarregamento = tarefasEmCarregamento.has(tarefa.id);
 
           const textoExibido = aberto
             ? tarefa.descricao
             : tarefa.descricao.slice(0, limite) +
               (tarefa.descricao.length > limite ? "..." : "");
 
-          const corPrioridade =
-            tarefa.prioridade === "Alta"
-              ? "#EF4444"
-              : tarefa.prioridade === "Média"
-                ? "#F59E0B"
-                : "#22C55E";
+          const corPrioridade = getCorPrioridade(tarefa.prioridade);
 
           return (
             <View style={[styles.card, { borderLeftColor: corPrioridade }]}>
@@ -199,8 +247,19 @@ export default function Home() {
               <Text style={styles.setor}>Setor: {tarefa.setor}</Text>
 
               <View style={styles.footer}>
-                <TouchableOpacity style={styles.botaoAceitar}>
-                  <Text style={styles.textoBotao}>Aceitar</Text>
+                <TouchableOpacity
+                  style={[
+                    styles.botaoAceitar,
+                    emCarregamento && { opacity: 0.6 },
+                  ]}
+                  onPress={() => handleAceitarTarefa(tarefa.id)}
+                  disabled={emCarregamento}
+                >
+                  {emCarregamento ? (
+                    <ActivityIndicator color="#FFF" size="small" />
+                  ) : (
+                    <Text style={styles.textoBotao}>Aceitar</Text>
+                  )}
                 </TouchableOpacity>
 
                 <View>
