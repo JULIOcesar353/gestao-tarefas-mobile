@@ -32,15 +32,23 @@ export async function loginUser(login, senha) {
       (response.mensagem &&
         response.mensagem.toLowerCase().includes("realizado"));
 
+    const token =
+      response.token ||
+      response.dados?.token ||
+      response.data?.token ||
+      response.accessToken ||
+      null;
+
     if (foiBemSucedido) {
-      // Se tem token, armazenar; senão, considerar como autenticado mesmo assim
-      if (response.token) {
-        await setToken(response.token);
+      if (token) {
+        await setToken(token);
+      } else {
+        console.warn("Login bem-sucedido, mas nenhum token JWT foi retornado.");
       }
 
       return {
         sucesso: true,
-        token: response.token || "auth_token_backend",
+        token: token || "auth_token_backend",
         mensagem: response.mensagem || "Login realizado com sucesso",
       };
     } else {

@@ -34,16 +34,27 @@ export async function criarTarefa(tarefaData) {
  * @param {number|string} id - ID da tarefa
  * @returns {Promise<Object>}
  */
-export async function aceitarTarefa(id) {
+/**
+ * Aceita uma tarefa (POST /tarefas/:id/aceitar)
+ * Novo endpoint dedicado para aceitar tarefa
+ * @param {number|string} id - ID da tarefa
+ * @param {number|string} funcionarioId - ID do funcionário que aceita
+ * @returns {Promise<Object>}
+ */
+export async function aceitarTarefa(id, funcionarioId = 1) {
   try {
     console.log("🟡 Iniciando aceitarTarefa com ID:", id);
-    console.log("📤 Enviando dados:", { atr_status: 1 });
+    console.log("👤 Funcionário ID:", funcionarioId);
 
-    const response = await patch(`/tarefas/${id}`, {
-      atr_status: 1,
-    });
+    const dadosPagamento = {
+      funcionario_id: funcionarioId,
+    };
 
-    console.log("✅ Resposta recebida:", response);
+    console.log("📤 Enviando dados:", JSON.stringify(dadosPagamento));
+
+    const response = await post(`/tarefas/${id}/aceitar`, dadosPagamento);
+
+    console.log("✅ Resposta recebida:", JSON.stringify(response));
     return response;
   } catch (error) {
     console.error("❌ Erro ao aceitar tarefa:", error);

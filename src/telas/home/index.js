@@ -41,15 +41,24 @@ export default function Home() {
   const fetchTarefas = async () => {
     try {
       setLoading(true);
+      console.log("📡 Buscando tarefas da API...");
       const data = await getTarefas();
-      console.log("API retornou:", data);
+      console.log("📊 Resposta da API:", data);
 
       const lista = Array.isArray(data.dados) ? data.dados : [];
+      console.log("📋 Tarefas recebidas:", lista.length);
+
+      lista.forEach((t) => {
+        console.log(
+          `  - ID: ${t.tar_id}, Status: ${t.atr_status}, Funcionário: ${t.atr_funcionario_id}`,
+        );
+      });
+
       const tarefasFormatadas = mapearTarefas(lista);
 
       setTarefas(tarefasFormatadas);
     } catch (error) {
-      console.error("Erro ao buscar tarefas:", error);
+      console.error("❌ Erro ao buscar tarefas:", error);
       const mensagem = formatErrorMessage(error);
       showToast(mensagem, "error");
     } finally {
@@ -72,23 +81,29 @@ export default function Home() {
   // Handlers
   const handleAceitarTarefa = async (tarefaId) => {
     try {
-      // Adicionar à lista de carregamento
       setTarefasEmCarregamento((prev) => new Set([...prev, tarefaId]));
 
-      const resultado = await aceitarTarefa(tarefaId);
+      console.log("📌 Aceitando tarefa ID:", tarefaId);
+
+      // TODO: Substituir 1 pelo ID do funcionário logado
+      // Por enquanto usando ID fixo 1
+      const resultado = await aceitarTarefa(tarefaId, 1);
+
+      console.log("✅ Resultado da aceitação:", resultado);
 
       if (resultado.sucesso || resultado.sucesso === undefined) {
         showToast("Tarefa aceita com sucesso!", "success");
 
-        // Atualizar a lista localmente ou recarregar
+        // Recarregar a lista completa
+        console.log("🔄 Recarregando lista de tarefas...");
         setTimeout(() => {
           fetchTarefas();
-        }, 500);
+        }, 300);
       } else {
         showToast(resultado.mensagem || "Erro ao aceitar tarefa", "error");
       }
     } catch (error) {
-      console.error("Erro ao aceitar tarefa:", error);
+      console.error("❌ Erro ao aceitar tarefa:", error);
       const mensagem = formatErrorMessage(error);
       showToast(mensagem, "error");
     } finally {
@@ -219,6 +234,7 @@ export default function Home() {
           const limite = 105;
           const aberto = abertoId === tarefa.id;
           const emCarregamento = tarefasEmCarregamento.has(tarefa.id);
+          const aceita = tarefa.status === 1;
 
           const textoExibido = aberto
             ? tarefa.descricao
@@ -228,17 +244,29 @@ export default function Home() {
           const corPrioridade = getCorPrioridade(tarefa.prioridade);
 
           return (
-            <View style={[styles.card, { borderLeftColor: corPrioridade }]}>
+            <View
+              style={[
+                styles.card,
+                { borderLeftColor: corPrioridade, opacity: aceita ? 0.7 : 1 },
+              ]}
+            >
               <View style={styles.headerCard}>
                 <View>
                   <Text style={styles.titulo}>{tarefa.titulo}</Text>
-                  <Text style={styles.sub}>{tarefa.corredor}</Text>
+                  <Text style={styles.sub}>
+                    {tarefa.corredor} {aceita && "✓ Aceita"}
+                  </Text>
                 </View>
 
                 <View
-                  style={[styles.badge, { backgroundColor: corPrioridade }]}
+                  style={[
+                    styles.badge,
+                    { backgroundColor: aceita ? "#10B981" : corPrioridade },
+                  ]}
                 >
-                  <Text style={styles.badgeText}>{tarefa.prioridade}</Text>
+                  <Text style={styles.badgeText}>
+                    {aceita ? "Aceita" : tarefa.prioridade}
+                  </Text>
                 </View>
               </View>
 
@@ -250,13 +278,16 @@ export default function Home() {
                 <TouchableOpacity
                   style={[
                     styles.botaoAceitar,
+                    aceita && { backgroundColor: "#10B981", opacity: 0.8 },
                     emCarregamento && { opacity: 0.6 },
                   ]}
                   onPress={() => handleAceitarTarefa(tarefa.id)}
-                  disabled={emCarregamento}
+                  disabled={emCarregamento || aceita}
                 >
                   {emCarregamento ? (
                     <ActivityIndicator color="#FFF" size="small" />
+                  ) : aceita ? (
+                    <Text style={styles.textoBotao}>✓ Aceita</Text>
                   ) : (
                     <Text style={styles.textoBotao}>Aceitar</Text>
                   )}

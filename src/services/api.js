@@ -4,32 +4,90 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const API_URL = "http://10.67.23.47:3333"; // Para emulador Android
 // Para celular físico, substitua pelo seu IP: 'http://SEU_IP:3000'
 
+let cachedToken = null;
+let asyncStorageAvailable = true;
+
+function isAsyncStorageNotAvailable(error) {
+  if (!error || !error.message) {
+    return false;
+  }
+
+  return (
+    error.message.includes("Native module is null") ||
+    error.message.includes("cannot access legacy storage") ||
+    error.message.includes("AsyncStorage is null")
+  );
+}
+
 // Função para obter token do AsyncStorage
 export async function getToken() {
+  if (!asyncStorageAvailable && cachedToken) {
+    console.warn("AsyncStorage indisponível, usando token em cache.");
+    return cachedToken;
+  }
+
   try {
+    console.log("🔍 Tentando obter token do AsyncStorage...");
     const token = await AsyncStorage.getItem("authToken");
+    console.log("✅ Token obtido:", token ? "Presente" : "Nulo");
+    cachedToken = token;
     return token;
   } catch (error) {
-    console.error("Erro ao obter token:", error);
+    if (isAsyncStorageNotAvailable(error)) {
+      asyncStorageAvailable = false;
+      console.warn(
+        "AsyncStorage nativo indisponível. Usando fallback em memória temporário.",
+        error,
+      );
+      return cachedToken;
+    }
+
+    console.error("❌ Erro ao obter token:", error);
     return null;
   }
 }
 
 // Função para armazenar token
 export async function setToken(token) {
+  cachedToken = token;
+
   try {
+    console.log("💾 Tentando armazenar token:", token ? "Presente" : "Nulo");
     await AsyncStorage.setItem("authToken", token);
+    console.log("✅ Token armazenado com sucesso");
   } catch (error) {
-    console.error("Erro ao armazenar token:", error);
+    if (isAsyncStorageNotAvailable(error)) {
+      asyncStorageAvailable = false;
+      console.warn(
+        "AsyncStorage nativo indisponível. Token armazenado apenas em memória.",
+        error,
+      );
+      return;
+    }
+
+    console.error("❌ Erro ao armazenar token:", error);
   }
 }
 
 // Função para remover token (logout)
 export async function removeToken() {
+  cachedToken = null;
+
   try {
+    console.log("🗑️ Removendo token...");
     await AsyncStorage.removeItem("authToken");
+    console.log("✅ Token removido com sucesso");
   } catch (error) {
-    console.error("Erro ao remover token:", error);
+    if (isAsyncStorageNotAvailable(error)) {
+      asyncStorageAvailable = false;
+      console.warn(
+        "AsyncStorage nativo indisponível. Token em memória removido.",
+        error,
+      );
+      return;
+    }
+
+    console.error("❌ Erro ao remover token:", error);
   }
 }
 
@@ -37,12 +95,16 @@ export async function removeToken() {
 async function getHeaders(includeAuth = true) {
   const headers = {
     "Content-Type": "application/json",
+    Accept: "application/json",
   };
 
   if (includeAuth) {
     const token = await getToken();
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
+      console.log("🔐 Authorization header adicionado.");
+    } else {
+      console.warn("⚠️ Nenhum token disponível para Authorization header.");
     }
   }
 
