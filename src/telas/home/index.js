@@ -87,7 +87,7 @@ export default function Home() {
 
       // TODO: Substituir 1 pelo ID do funcionário logado
       // Por enquanto usando ID fixo 1
-      const resultado = await aceitarTarefa(tarefaId, 1);
+      const resultado = await aceitarTarefa(tarefaId);
 
       console.log("✅ Resultado da aceitação:", resultado);
 
@@ -132,14 +132,18 @@ export default function Home() {
 
   const listaFiltrada = tarefas
     .filter((tarefa) => {
+      // Mostrar somente tarefas pendentes (status === 0)
+      const pendente = Number(tarefa.status) === 0;
       const matchesPrioridade =
-        !prioridadeFiltro || tarefa.prioridade === prioridadeFiltro;
+        pendente &&
+        (!prioridadeFiltro || tarefa.prioridade === prioridadeFiltro);
 
       const matchesBusca =
-        !textoFiltrado ||
-        [tarefa.titulo, tarefa.descricao, tarefa.setor, tarefa.corredor]
-          .filter(Boolean)
-          .some((campo) => campo.toLowerCase().includes(textoFiltrado));
+        pendente &&
+        (!textoFiltrado ||
+          [tarefa.titulo, tarefa.descricao, tarefa.setor, tarefa.corredor]
+            .filter(Boolean)
+            .some((campo) => campo.toLowerCase().includes(textoFiltrado)));
 
       return matchesPrioridade && matchesBusca;
     })

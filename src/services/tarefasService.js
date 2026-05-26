@@ -1,4 +1,5 @@
 import { get, post, patch, deleteRequest } from "./api";
+import { getCurrentUserId } from "./authService";
 
 /**
  * Obtém a lista de tarefas da API
@@ -10,6 +11,31 @@ export async function getTarefas() {
     return tarefas;
   } catch (error) {
     console.error("Erro ao obter tarefas:", error);
+    throw error;
+  }
+}
+
+/**
+ * Obtém as tarefas aceitas pela API
+ * @param {number|string|null} funcionarioId - ID do funcionário para filtrar tarefas aceitas
+ * @returns {Promise<Object>}
+ */
+export async function getTarefasAceitas(funcionarioId = null) {
+  try {
+    if (funcionarioId == null) {
+      funcionarioId = await getCurrentUserId();
+    }
+
+    const response = await get("/tarefas");
+    const lista = Array.isArray(response.dados) ? response.dados : [];
+    const tarefasAceitas = lista.filter(
+      (t) =>
+        t.atr_status === 1 &&
+        (funcionarioId == null || t.atr_funcionario_id == funcionarioId),
+    );
+    return { ...response, dados: tarefasAceitas };
+  } catch (error) {
+    console.error("Erro ao obter tarefas aceitas:", error);
     throw error;
   }
 }
@@ -41,8 +67,11 @@ export async function criarTarefa(tarefaData) {
  * @param {number|string} funcionarioId - ID do funcionário que aceita
  * @returns {Promise<Object>}
  */
-export async function aceitarTarefa(id, funcionarioId = 1) {
+export async function aceitarTarefa(id, funcionarioId = null) {
   try {
+    if (funcionarioId == null) {
+      funcionarioId = await getCurrentUserId();
+    }
     console.log("🟡 Iniciando aceitarTarefa com ID:", id);
     console.log("👤 Funcionário ID:", funcionarioId);
 
@@ -75,6 +104,69 @@ export async function editarTarefa(id, dados) {
     return response;
   } catch (error) {
     console.error("Erro ao editar tarefa:", error);
+    throw error;
+  }
+}
+
+export async function concluirTarefa(id, originalData = null) {
+  try {
+    // Se não recebeu os dados originais, tenta obter do endpoint de tarefa única
+    if (!originalData) {
+      try {
+        const single = await get(`/tarefas/${id}`);
+        // backend pode devolver no .dados ou direto
+        originalData = single?.dados || single?.data || single;
+      } catch (e) {
+        // se falhar, segue em frente e o payload pode ficar com valores nulos
+        console.warn("Não foi possível obter dados originais da tarefa:", e);
+      }
+    }
+
+    const createdByIdRaw =
+      originalData?.tar_criado_por ??
+      originalData?.tar_criado_por_id ??
+      originalData?.criadoPor ??
+      originalData?.usu_id ??
+      originalData?.usuId ??
+      originalData?.atr_funcionario_id ??
+      null;
+
+    const setorIdRaw =
+      originalData?.tar_setor_id ??
+      originalData?.setorId ??
+      originalData?.setor ??
+      null;
+
+    const prioridadeRaw =
+      originalData?.tar_prioridade ??
+      originalData?.prioridadeId ??
+      originalData?.prioridade ??
+      null;
+
+    const payload = {
+      // backend espera 'status' no body para atualizar a atribuição
+      status: 2,
+      setorId: setorIdRaw != null ? Number(setorIdRaw) : null,
+      criadoPor: createdByIdRaw != null ? Number(createdByIdRaw) : null,
+      titulo: originalData?.tar_titulo ?? originalData?.titulo ?? "",
+      descricao: originalData?.tar_descricao ?? originalData?.descricao ?? "",
+      prioridade: prioridadeRaw != null ? Number(prioridadeRaw) : null,
+      estimativaMinutos:
+        originalData?.tar_estimativa_minutos ??
+        originalData?.estimativaMinutos ??
+        0,
+    };
+
+    // Remover chaves nulas para não poluir o corpo, mas backend exige alguns campos — prefer enviar valores existentes
+    const cleaned = Object.keys(payload).reduce((acc, k) => {
+      if (payload[k] !== null && payload[k] !== undefined) acc[k] = payload[k];
+      return acc;
+    }, {});
+
+    const response = await patch(`/tarefas/${id}`, cleaned);
+    return response;
+  } catch (error) {
+    console.error("Erro ao concluir tarefa:", error);
     throw error;
   }
 }
@@ -138,8 +230,33 @@ export function mapearTarefas(dados) {
   if (!Array.isArray(dados)) {
     return [];
   }
+  // Deduplicar tarefas retornadas pela API (quando há múltiplas linhas por tarefa
+  // devido a várias atribuições). Mantemos a linha com maior 'atr_status'
+  // (null/0 < 1 < 2) para refletir o estado mais atual.
+  const mapa = new Map();
 
-  return dados.map((t) => ({
+  dados.forEach((t) => {
+    const id = t.tar_id;
+    const existing = mapa.get(id);
+    const currStatus =
+      t.atr_status === null || t.atr_status === undefined
+        ? -1
+        : Number(t.atr_status);
+
+    const existingStatus = existing
+      ? existing.atr_status === null || existing.atr_status === undefined
+        ? -1
+        : Number(existing.atr_status)
+      : -2;
+
+    if (!existing || currStatus > existingStatus) {
+      mapa.set(id, t);
+    }
+  });
+
+  const unique = Array.from(mapa.values());
+
+  return unique.map((t) => ({
     id: t.tar_id,
     titulo: t.tar_titulo || "",
     descricao: t.tar_descricao || "",
