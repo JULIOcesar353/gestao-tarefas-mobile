@@ -23,7 +23,15 @@ export async function getTarefas() {
 export async function getTarefasAceitas(funcionarioId = null) {
   try {
     if (funcionarioId == null) {
-      funcionarioId = await getCurrentUserId();
+      try {
+        funcionarioId = await getCurrentUserId();
+      } catch (e) {
+        console.warn(
+          "Aviso: não foi possível obter ID do usuário (AsyncStorage/Native module). Ignorando filtro por usuário.",
+          e,
+        );
+        funcionarioId = null;
+      }
     }
 
     const response = await get("/tarefas");
@@ -271,6 +279,28 @@ export function mapearTarefas(dados) {
     status: t.atr_status,
     funcionarioId: t.atr_funcionario_id,
     estimativaMinutos: t.tar_estimativa_minutos,
+    // dados originais e informações do criador
     dataOriginal: t,
+    criadoPorId:
+      t.tar_criado_por ??
+      t.tar_criado_por_id ??
+      t.criadoPor ??
+      t.usu_id ??
+      t.usuId ??
+      null,
+    criadoPorNome:
+      (t.tar_criado_por_nome ||
+        t.tar_criado_por_nome_completo ||
+        t.criadoPorNome ||
+        t.usu_nome ||
+        t.usu_nome_completo ||
+        t.nome) ??
+      (t.tar_criado_por ||
+      t.tar_criado_por_id ||
+      t.criadoPor ||
+      t.usu_id ||
+      t.usuId
+        ? `Usuário ${t.tar_criado_por ?? t.tar_criado_por_id ?? t.criadoPor ?? t.usu_id ?? t.usuId}`
+        : "-"),
   }));
 }

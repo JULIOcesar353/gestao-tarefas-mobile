@@ -103,22 +103,52 @@ function extractUserIdFromResponse(response, token) {
 
 export async function setStoredUserId(userId) {
   try {
-    if (userId == null) {
+    if (!AsyncStorage || typeof AsyncStorage.setItem !== "function") {
+      console.warn(
+        "AsyncStorage não disponível (módulo nativo ausente). Ignorando setStoredUserId.",
+      );
       return;
     }
 
+    if (userId == null) return;
+
     await AsyncStorage.setItem(AUTH_USER_ID_KEY, String(userId));
   } catch (error) {
-    console.error("Erro ao salvar userId no AsyncStorage:", error);
+    const msg = error && error.message ? String(error.message) : "";
+    if (
+      msg.includes("Native module is null") ||
+      msg.includes("cannot access legacy storage") ||
+      msg.includes("AsyncStorage is null")
+    ) {
+      console.warn("AsyncStorage nativo indisponível ao salvar userId:", msg);
+    } else {
+      console.error("Erro ao salvar userId no AsyncStorage:", error);
+    }
   }
 }
 
 export async function getStoredUserId() {
   try {
+    if (!AsyncStorage || typeof AsyncStorage.getItem !== "function") {
+      console.warn(
+        "AsyncStorage não disponível (módulo nativo ausente). getStoredUserId retornará null.",
+      );
+      return null;
+    }
+
     const storedId = await AsyncStorage.getItem(AUTH_USER_ID_KEY);
     return storedId;
   } catch (error) {
-    console.error("Erro ao ler userId do AsyncStorage:", error);
+    const msg = error && error.message ? String(error.message) : "";
+    if (
+      msg.includes("Native module is null") ||
+      msg.includes("cannot access legacy storage") ||
+      msg.includes("AsyncStorage is null")
+    ) {
+      console.warn("AsyncStorage nativo indisponível ao ler userId:", msg);
+    } else {
+      console.error("Erro ao ler userId do AsyncStorage:", error);
+    }
     return null;
   }
 }

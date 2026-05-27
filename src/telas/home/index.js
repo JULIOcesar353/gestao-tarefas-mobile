@@ -257,9 +257,7 @@ export default function Home() {
               <View style={styles.headerCard}>
                 <View>
                   <Text style={styles.titulo}>{tarefa.titulo}</Text>
-                  <Text style={styles.sub}>
-                    {tarefa.corredor} {aceita && "✓ Aceita"}
-                  </Text>
+                  <Text style={styles.sub}>{aceita ? "✓ Aceita" : ""}</Text>
                 </View>
 
                 <View
@@ -277,6 +275,10 @@ export default function Home() {
               <Text style={styles.descricao}>{textoExibido}</Text>
 
               <Text style={styles.setor}>Setor: {tarefa.setor}</Text>
+
+              <Text style={styles.criado}>
+                Criado por: {tarefa.criadoPorNome}
+              </Text>
 
               <View style={styles.footer}>
                 <TouchableOpacity
